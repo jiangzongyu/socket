@@ -5,7 +5,13 @@ const moment = require('moment');
 
 const app = new Koa();
 
-const chatList = [];
+const chatList = [
+  // {
+  //   user: { name: '用户2', id: '2', avatar: '/src/assets/2.jpeg' },
+  //   message: 'test',
+  //   createTime: '2023-06-26 17:46:07',
+  // },
+];
 const server = http.createServer(app.callback());
 const io = new Server(server, {
   serveClient: false,
@@ -16,19 +22,18 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  socket.emit('fresh-message', chatList);
+  io.sockets.emit('fresh-message', chatList);
   socket.on('send-message', (user, message) => {
+    // console.log(user);
+    // console.log(message);
     const createTime = moment().format('YYYY-MM-DD HH:mm:ss');
     chatList.push({
       user,
       message,
       createTime,
     });
-    socket.emit('fresh-message', chatList);
-    socket.broadcast.emit("fresh-message", chatList);
-  });
-  socket.on("ping", (count) => {
-    console.log(count);
+    io.sockets.emit('fresh-message', chatList);
   });
 });
+
 io.listen(3001);
